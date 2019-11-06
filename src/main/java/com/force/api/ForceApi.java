@@ -1,10 +1,5 @@
 package com.force.api;
 
-import com.force.api.http.Http;
-import com.force.api.http.HttpRequest;
-import com.force.api.http.HttpResponse;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -12,19 +7,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.force.api.http.Http;
+import com.force.api.http.HttpRequest;
+import com.force.api.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * main class for making API calls.
@@ -186,7 +180,6 @@ public class ForceApi {
 
 	}
 
-
 	public ResourceRepresentation getSObject(String type, String id) throws ResourceException {
 		// Should we return null or throw an exception if the record is not found?
 		// Right now will just throw crazy runtimeexception with no explanation
@@ -195,6 +188,24 @@ public class ForceApi {
 					.method("GET")
 					.header("Accept", "application/json")),
 				jsonMapper);
+	}
+
+	public ResourceRepresentation getSObject(String type, String externalIdField, String externalIdValue)
+			throws ResourceException {
+
+		try {
+			// Should we return null or throw an exception if the record is not found?
+			// Right now will just throw crazy runtimeexception with no explanation
+			return new ResourceRepresentation(apiRequest(new HttpRequest()
+					.url(uriBase() + "/sobjects/" + type + "/" + externalIdField
+							+ "/" + URLEncoder.encode(externalIdValue, "UTF-8"))
+					.method("GET")
+					.header("Accept", "application/json")),
+					jsonMapper);
+
+		} catch (IOException e) {
+			throw new ResourceException(e);
+		}
 	}
 
 	public String createSObject(String type, Object sObject) {
